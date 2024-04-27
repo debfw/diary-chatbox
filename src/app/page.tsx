@@ -1,42 +1,31 @@
 "use client";
-import ChatSnackbar from "@/components/ChatSnackbar";
 import { features } from "@/assets/features";
-import { FeatureTitles } from "@/types/feature";
-
-import { ReactNode, useState } from "react";
-
-import SpellCheck from "@/components/spellCheck";
 import DiaryBoard from "@/components/DiaryBoard";
+import { FeatureCard } from "@/components/FeatureCard";
 
 export default function Home() {
-  const [displayFeature, setDisplayFeature] = useState<ReactNode>();
-
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl flex items-center justify-between font-mono text-sm flex-wrap">
-        <p className="fixed left-0 top-0 w-full flex justify-center border-b py-8 bg-yellow-50">
-          Developed by Auntie Liko.
+    <main className="flex min-h-screen flex-col items-center justify-between px-4 md:px-8 lg:px-24 py-24">
+      <header className="z-10 fixed top-0 left-0 w-full border-b bg-yellow-50 py-4 md:py-8">
+        <p className="text-center font-mono text-sm">
+          Crafted by Auntie Liko, whose diary sprints started fast and quit
+          faster.
         </p>
-      </div>
-
-      <div className="relative z-0 flex flex-col items-center">
-        <h2 className="mb-3 text-9xl font-semibold">JourneyPal</h2>
-        <p className="text-3xl max-w-[30ch] opacity-50">
+      </header>
+      <div className="relative z-0 flex flex-col items-center mt-24 md:mt-32">
+        <h2 className="text-6xl md:text-8xl lg:text-9xl font-semibold mb-2 md:mb-3">
+          JourneyPal
+        </h2>
+        <p className="text-xl md:text-2xl lg:text-3xl opacity-50 max-w-xs md:max-w-md lg:max-w-[30ch] text-center">
           An AI assistant to help you write diaries faster and easier.
         </p>
-        <DiaryBoard />
       </div>
-
-      <div className="mt-10 mb-10"> {displayFeature}</div>
-
-      <div className="mb-32 lg:mb-0 lg:w-full lg:max-w-5xl lg:grid lg:grid-cols-4 lg:text-left">
+      <section className="mb-12 md:mb-16 lg:mb-20">
+        <DiaryBoard />
+      </section>
+      <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16 md:mb-20 lg:mb-32">
         {features.map((feature) => (
-          <div key={feature.title} className="mb-6 lg:mb-0 ">
-            <div className="mb-2 text-2xl font-semibold">{feature.title}</div>
-            <p className="text-sm max-w-[25ch] opacity-50 ">
-              {feature.description}
-            </p>
-          </div>
+          <FeatureCard key={feature.title} feature={feature} />
         ))}
       </div>
     </main>

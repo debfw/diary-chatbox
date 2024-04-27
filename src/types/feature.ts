@@ -1,6 +1,10 @@
-export enum FeatureTitles {
-  GENERATE_DIARY = "Generate Diary",
-  SEARCH_HISTORY = "Search History",
-  SEND_AS_EMAIL = "Send As Email!",
-  SPELL_CHECK = 'Spell Check'
-}
+import {
+  DiaryEntrySchema,
+  FeatureTitlesEnum,
+  FeaturesTypeSchema,
+} from "@/utils/schema";
+import { z } from "zod";
+
+export type FeatureTitles = z.infer<typeof FeatureTitlesEnum>;
+export type FeaturesType = z.infer<typeof FeaturesTypeSchema>;
+export type DiaryEntry = z.infer<typeof DiaryEntrySchema>;

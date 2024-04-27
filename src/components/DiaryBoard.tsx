@@ -1,15 +1,21 @@
 "use client";
-import { Avatar, Box, OutlinedInput, SnackbarContent } from "@mui/material";
+import { Avatar, Box, SnackbarContent } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useCompletion } from "ai/react";
-import React, { useCallback } from "react";
+import React, { useCallback, useRef, useState } from "react";
+import SearchHistory from "./SearchHistory";
+import { DiaryEntry } from "@/types/feature";
+
 
 const defaultText =
   "Hey kids, I'm your JourneyPal! I can turn your words into drawings and your stories into memories. Let's make your diary awesome together! Ready for an adventure?";
-export default function DiaryBoard() {
+
+function DiaryBoard() {
   const [response, setResponse] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  const [message, setMessage] = React.useState("");
+
+  const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
+  const emailRef = useRef<HTMLInputElement | null>(null);
+  const diaryEntryRef = useRef<HTMLInputElement | null>(null);
   const { complete } = useCompletion({
     api: "/api/chat",
   });
@@ -17,21 +23,29 @@ export default function DiaryBoard() {
   const { complete: completeSpellCheck } = useCompletion({
     api: "/api/spellCheck",
   });
-
+  console.log("render");
   const handleCheckSpelling = useCallback(
-    async (msg: string) => {
-      const completion = await completeSpellCheck(msg);
+    async (entryText: string) => {
+      const completion = await completeSpellCheck(entryText);
       if (!completion) throw new Error("Failed to check typos");
       const typos = JSON.parse(completion);
       if (typos?.length && !window.confirm("Typos found… continue?")) return;
-      else alert("No Typo! Diary Saved!");
+      else {
+        setDiaryEntries((prevEntries) => [
+          ...prevEntries,
+          {
+            id: Date.now(),
+            text: entryText,
+            date: new Date(),
+          },
+        ]);
+        diaryEntryRef.current!.value = "";
+        alert("Diary Saved!");
+      }
     },
     [completeSpellCheck]
   );
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessage(e.target.value);
-  };
   const handleResponse = React.useCallback(
     async (msg: string) => {
       const completion = await complete(msg);
@@ -48,10 +62,13 @@ export default function DiaryBoard() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ senderEmail: email, message: message }),
+      body: JSON.stringify({
+        senderEmail: emailRef.current!.value,
+        message: (diaryEntryRef.current!.value = ""),
+      }),
     });
     console.log(response);
-    console.log(email, message);
+    console.log(emailRef.current!.value, (diaryEntryRef.current!.value = ""));
   };
 
   return (
@@ -72,19 +89,17 @@ export default function DiaryBoard() {
         />
       </Box>
 
-      <textarea
+      <input
         placeholder="Your Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        ref={emailRef}
         className="w-full h-16 mb-6 p-4 rounded-md bg-gray-100 dark:bg-gray-700 dark:text-gray-100"
       />
-      <textarea
+      <input
+        ref={diaryEntryRef}
         className="w-full h-[200px] mb-6 p-4 rounded-md bg-gray-100 dark:bg-gray-700 dark:text-gray-100"
         placeholder={
           "1. Keep your diary. 2. Ask or click buttons below for suggestions."
         }
-        onChange={handleChange}
-        value={message}
       />
 
       <div className="grid grid-cols-3 gap-4 mb-6">
@@ -111,14 +126,14 @@ export default function DiaryBoard() {
         <Button
           variant="contained"
           sx={{ background: "black" }}
-          onClick={() => handleResponse(message)}
+          onClick={() => handleResponse(diaryEntryRef.current!.value)}
         >
           Ask JourneyPal
         </Button>
         <Button
           variant="contained"
           sx={{ background: "black" }}
-          onClick={() => handleCheckSpelling(message)}
+          onClick={() => handleCheckSpelling(diaryEntryRef.current!.value)}
         >
           Finished & Save
         </Button>
@@ -130,6 +145,9 @@ export default function DiaryBoard() {
           Send email
         </Button>
       </div>
+      <SearchHistory entries={diaryEntries} />
     </div>
   );
 }
+
+export default DiaryBoard

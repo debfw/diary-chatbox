@@ -36,6 +36,7 @@ To set up the Travel Diary app on your local machine:
 - @mui/material, @emotion/react for UI components and styling.
 - dayjs for date manipulation.
 - mailersend for email sending functionalities.
+- openAI for chatbot
 - And more listed in the provided `package.json`.
 
 ## Development

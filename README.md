@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+#  JourneyPal
 
-## Getting Started
+JourneyPal is a diary assistant that helps kids create and manage their diary entries. It features options for generating diary content, searching through entries, spell-checking, and sending entries via email. The interface is clean, with a focus on ease of use, and includes interactive prompts for writing assistance.
 
-First, run the development server:
+## Table of Contents
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- [Installation](#installation)
+- [Features](#features)
+- [Usage](#usage)
+- [Dependencies](#dependencies)
+- [Development](#development)
+- [Contributing](#contributing)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+To set up the Travel Diary app on your local machine:
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+1. Clone the repository to your local machine.
+2. Navigate to the cloned directory.
+3. Create a `.env` file in the root directory and add your `OPENAI_API_KEY` and `MAILERSEND_API_KEY` to it:
+4. Install the dependencies with `npm install`.
+5. Start the development server with `npm run dev` which will host the app on `http://localhost:3000`.
 
-## Learn More
+## Features
 
-To learn more about Next.js, take a look at the following resources:
+- **Diary Board:** Document your travel experiences.
+- **Feature Card:** Highlight special moments or places.
+- **Search History:** Easily find past entries.
+- **Spell Check:** Ensure your stories are flawless.
+- **Email Integration:** Share your diaries or get notifications.
+- **Real-Time Chat:** Stay connected with fellow travelers.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Dependencies
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- Next.js for server-side rendering and static site generation.
+- @mui/material, @emotion/react for UI components and styling.
+- dayjs for date manipulation.
+- mailersend for email sending functionalities.
+- And more listed in the provided `package.json`.
 
-## Deploy on Vercel
+## Development
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Use `npm run build` to build the application for production.
+- To start the production server, use `npm run start`.
+- Lint your code with `npm run lint`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Contributing
+
+Contributions to Travel Diary are always welcome, whether it's bug reports, feature requests, or pull requests.
+
+Before contributing, please read our contributing guide.
+
+
+

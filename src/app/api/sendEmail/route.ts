@@ -1,7 +1,6 @@
 import { MailerSend, EmailParams, Sender, Recipient } from "mailersend";
-import { NextApiRequest } from "next";
 
-export async function POST(req: NextApiRequest) {
+export async function POST(req: any) {
   const { senderEmail, message } = req.body;
   console.log(senderEmail, message);
   // Change if you want to receive the email sent

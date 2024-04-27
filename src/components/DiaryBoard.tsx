@@ -54,15 +54,16 @@ function DiaryBoard() {
   );
 
   const handleSendEmail = async (e: React.SyntheticEvent) => {
+    console.log("send email");
     e.preventDefault();
-    const response = await fetch("/api/sendEmail", {
+    await fetch("/api/sendEmail", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        senderEmail: emailRef.current!.value,
-        message: (diaryEntryRef.current!.value = ""),
+        senderEmail: emailRef.current?.value ?? "",
+        message: diaryEntryRef.current?.value ?? "",
       }),
     });
   };

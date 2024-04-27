@@ -2,7 +2,6 @@ import { MailerSend, EmailParams, Sender, Recipient } from "mailersend";
 
 export async function POST(req: any) {
   const { senderEmail, message } = req.body;
-  console.log(senderEmail, message);
   // Change if you want to receive the email sent
   const recipientEmail = "clwork1324@gmail.com";
 

@@ -6,7 +6,6 @@ import React, { useCallback, useRef, useState } from "react";
 import SearchHistory from "./SearchHistory";
 import { DiaryEntry } from "@/types/feature";
 
-
 const defaultText =
   "Hey kids, I'm your JourneyPal! I can turn your words into drawings and your stories into memories. Let's make your diary awesome together! Ready for an adventure?";
 
@@ -23,7 +22,6 @@ function DiaryBoard() {
   const { complete: completeSpellCheck } = useCompletion({
     api: "/api/spellCheck",
   });
-  console.log("render");
   const handleCheckSpelling = useCallback(
     async (entryText: string) => {
       const completion = await completeSpellCheck(entryText);
@@ -67,8 +65,6 @@ function DiaryBoard() {
         message: (diaryEntryRef.current!.value = ""),
       }),
     });
-    console.log(response);
-    console.log(emailRef.current!.value, (diaryEntryRef.current!.value = ""));
   };
 
   return (
@@ -150,4 +146,4 @@ function DiaryBoard() {
   );
 }
 
-export default DiaryBoard
+export default DiaryBoard;

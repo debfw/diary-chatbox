@@ -2,19 +2,29 @@
 import { Avatar, Box, SnackbarContent } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useCompletion } from "ai/react";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useState } from "react";
 import SearchHistory from "./SearchHistory";
 import { DiaryEntry } from "@/types/feature";
-
+import { useForm } from "react-hook-form";
 const defaultText =
   "Hey kids, I'm your JourneyPal! I can turn your words into drawings and your stories into memories. Let's make your diary awesome together! Ready for an adventure?";
 
 function DiaryBoard() {
-  const [response, setResponse] = React.useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+  } = useForm();
 
+  const onSubmit = (data: any) => console.log(data);
+
+  const initialValues = {
+    text: "",
+    email: "",
+  };
+  const [response, setResponse] = useState("");
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
-  const emailRef = useRef<HTMLInputElement | null>(null);
-  const diaryEntryRef = useRef<HTMLInputElement | null>(null);
   const { complete } = useCompletion({
     api: "/api/chat",
   });
@@ -22,27 +32,25 @@ function DiaryBoard() {
   const { complete: completeSpellCheck } = useCompletion({
     api: "/api/spellCheck",
   });
-  const handleCheckSpelling = useCallback(
-    async (entryText: string) => {
-      const completion = await completeSpellCheck(entryText);
-      if (!completion) throw new Error("Failed to check typos");
-      const typos = JSON.parse(completion);
-      if (typos?.length && !window.confirm("Typos found… continue?")) return;
-      else {
-        setDiaryEntries((prevEntries) => [
-          ...prevEntries,
-          {
-            id: Date.now(),
-            text: entryText,
-            date: new Date(),
-          },
-        ]);
-        diaryEntryRef.current!.value = "";
-        alert("Diary Saved!");
-      }
-    },
-    [completeSpellCheck]
-  );
+
+  const handleCheckSpelling = async (entryText: string) => {
+    const completion = await completeSpellCheck(entryText);
+    if (!completion) throw new Error("Failed to check typos");
+    const typos = JSON.parse(completion);
+    if (typos?.length && !window.confirm("Typos found… continue?")) return;
+    else {
+      setDiaryEntries((prevEntries) => [
+        ...prevEntries,
+        {
+          id: Date.now(),
+          text: entryText,
+          date: new Date(),
+        },
+      ]);
+      getValues().text = "";
+      alert("Diary Saved!");
+    }
+  };
 
   const handleResponse = React.useCallback(
     async (msg: string) => {
@@ -55,15 +63,14 @@ function DiaryBoard() {
 
   const handleSendEmail = async (e: React.SyntheticEvent) => {
     console.log("send email");
-    e.preventDefault();
     await fetch("/api/sendEmail", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        senderEmail: emailRef.current?.value ?? "",
-        message: diaryEntryRef.current?.value ?? "",
+        senderEmail: getValues().text ?? "",
+        message: getValues().text ?? "",
       }),
     });
   };
@@ -86,62 +93,81 @@ function DiaryBoard() {
         />
       </Box>
 
-      <input
-        placeholder="Your Email"
-        ref={emailRef}
-        className="w-full h-16 mb-6 p-4 rounded-md bg-gray-100 dark:bg-gray-700 dark:text-gray-100"
-      />
-      <input
-        ref={diaryEntryRef}
-        className="w-full h-[200px] mb-6 p-4 rounded-md bg-gray-100 dark:bg-gray-700 dark:text-gray-100"
-        placeholder={
-          "1. Keep your diary. 2. Ask or click buttons below for suggestions."
-        }
-      />
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <label htmlFor="email">Email</label>
+        <input
+          className="w-full h-16 mb-6 p-4 rounded-md bg-gray-100 dark:bg-gray-700 dark:text-gray-100"
+          defaultValue={initialValues.email}
+          placeholder="bluebill1049@hotmail.com"
+          type="email"
+          {...register("email")}
+        />
 
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <Button
-          variant="outlined"
-          onClick={() => handleResponse("one idea on todays highlights")}
-        >
-          Highlights
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={() => handleResponse("one idea on todays gratitude")}
-        >
-          Gratitude
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={() => handleResponse("one idea on todays today goals")}
-        >
-          Goals
-        </Button>
-      </div>
-      <div className="flex justify-end space-x-4">
-        <Button
-          variant="contained"
-          sx={{ background: "black" }}
-          onClick={() => handleResponse(diaryEntryRef.current!.value)}
-        >
-          Ask JourneyPal
-        </Button>
-        <Button
-          variant="contained"
-          sx={{ background: "black" }}
-          onClick={() => handleCheckSpelling(diaryEntryRef.current!.value)}
-        >
-          Finished & Save
-        </Button>
-        <Button
-          onClick={handleSendEmail}
-          variant="contained"
-          sx={{ background: "black" }}
-        >
-          Send email
-        </Button>
-      </div>
+        <label htmlFor="text">Diary Box</label>
+        <input
+          className="w-full h-[200px] p-4 rounded-md bg-gray-100 dark:bg-gray-700 dark:text-gray-100"
+          defaultValue={initialValues.text}
+          placeholder="Keep your diary or ask for suggestions."
+          {...register("text", {
+            required: true,
+            validate: (value) =>
+              value !== "Keep your diary or ask for suggestions.",
+          })}
+        />
+        {errors.text && <p className="text-red-500 mb-5">This is required</p>}
+
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <Button
+            variant="outlined"
+            type="submit"
+            onClick={() => handleResponse("one idea on todays highlights")}
+          >
+            Highlights
+          </Button>
+          <Button
+            variant="outlined"
+            type="submit"
+            onClick={() => handleResponse("one idea on todays gratitude")}
+          >
+            Gratitude
+          </Button>
+          <Button
+            variant="outlined"
+            type="submit"
+            onClick={() => handleResponse("one idea on todays today goals")}
+          >
+            Goals
+          </Button>
+        </div>
+        <div className="flex justify-end space-x-4">
+          <Button
+            variant="contained"
+            type="submit"
+            sx={{ background: "black" }}
+            onClick={() => handleResponse(getValues().text)}
+          >
+            Ask JourneyPal
+          </Button>
+          <Button
+            variant="contained"
+            type="submit"
+            sx={{ background: "black" }}
+            onClick={() => handleCheckSpelling(getValues().text)}
+          >
+            Finished & Save
+          </Button>
+          <Button
+            type="submit"
+            onClick={(e) => {
+              handleSendEmail(e);
+            }}
+            variant="contained"
+            sx={{ background: "black" }}
+          >
+            Send email
+          </Button>
+        </div>
+      </form>
       <SearchHistory entries={diaryEntries} />
     </div>
   );

@@ -1,6 +1,6 @@
 #  JourneyPal
 
-JourneyPal is a diary assistant that helps kids create and manage their diary entries. It features options for generating diary content, searching through entries, spell-checking, and sending entries via email. The interface is clean, with a focus on ease of use, and includes interactive prompts for writing assistance.
+JourneyPal is a diary assistant that helps kids create and manage their diary entries. It features options for generating diary content, searching through entries, spell-checking, and sending diary to others as an email. The interface is clean, with a focus on ease of use, and includes interactive prompts for writing assistance.
 
 ## Table of Contents
 
@@ -23,20 +23,23 @@ To set up the Travel Diary app on your local machine:
 
 ## Features
 
-- **Diary Board:** Document your travel experiences.
+- **Diary Board:** Document your experiences.
 - **Feature Card:** Highlight special moments or places.
 - **Search History:** Easily find past entries.
-- **Spell Check:** Ensure your stories are flawless.
-- **Email Integration:** Share your diaries or get notifications.
-- **Real-Time Chat:** Stay connected with fellow travelers.
+- **Spell Check:** Ensure your diary are flawless.
+- **Email Integration:** Share your diaries.
+- **Real-Time Chat:** Stay connected with chatbot.
 
 ## Dependencies
 
 - Next.js for server-side rendering and static site generation.
 - @mui/material, @emotion/react for UI components and styling.
 - dayjs for date manipulation.
-- mailersend for email sending functionalities.
+- Mailersend for email sending functionalities.
 - openAI for chatbot
+- Zod for TypeScript-first schema declaration and validation
+- React hook form for form validation
+- React Query for state management and error handling
 - And more listed in the provided `package.json`.
 
 ## Development

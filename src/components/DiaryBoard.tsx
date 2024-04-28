@@ -4,22 +4,14 @@ import { Avatar, Box, SnackbarContent } from "@mui/material";
 import Button from "@mui/material/Button";
 import React, { useState } from "react";
 import SearchHistory from "./SearchHistory";
-import { DiaryEntry } from "@/types/feature";
 import { useForm, Controller } from "react-hook-form";
-import { z } from "zod";
 import {
   useChatQuery,
   useSpellCheckQuery,
   useSendEmailMutation,
 } from "@/utils/queries";
-
-const defaultText =
-  "Hey kids, I'm your JourneyPal! I can turn your words into drawings and your stories into memories. Let's make your diary awesome together! Ready for an adventure?";
-
-const defaultValues: FormValue = {
-  text: "",
-  email: "",
-} as const;
+import { DiaryEntry, FormValue, formSchema } from "@/utils/schema";
+import { defaultText, defaultValues } from "@/assets/defaults";
 
 const chatBotButtons = [
   { label: "Highlights", response: "one idea on todays highlights" },
@@ -27,19 +19,10 @@ const chatBotButtons = [
   { label: "Goals", response: "one idea on todays today goals" },
 ] as const;
 
-const formSchema = z.object({
-  text: z
-    .string()
-    .min(10, { message: "Please enter more than 10 characters." }),
-  email: z.string().email({ message: "Please correct your email address." }),
-});
-
-type FormValue = z.infer<typeof formSchema>;
-
 function DiaryBoard() {
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
   const { control, handleSubmit, formState, setValue, watch } = useForm({
-    defaultValues,
+    defaultValues: defaultValues,
     resolver: zodResolver(formSchema),
   });
 
@@ -86,7 +69,6 @@ function DiaryBoard() {
             </p>
           )
       )}
-
       <Box sx={{ display: "flex", marginBottom: 5 }}>
         <Avatar
           alt="J"
@@ -100,7 +82,7 @@ function DiaryBoard() {
       </Box>
 
       <form>
-        <label htmlFor="email">Email</label>
+        <label htmlFor="email">Your Email</label>
         <Controller
           name="email"
           control={control}
@@ -108,7 +90,7 @@ function DiaryBoard() {
             <input
               {...field}
               className="w-full h-16 mb-6 p-4 rounded-md bg-gray-100 dark:bg-gray-700 dark:text-gray-100"
-              placeholder="bluebill1049@hotmail.com"
+              placeholder="yourEmail@hotmail.com"
               type="email"
             />
           )}

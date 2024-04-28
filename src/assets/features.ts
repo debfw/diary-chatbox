@@ -1,4 +1,3 @@
-//centralized the main features
 export const features = [
   {
     title: "Generate Diary",

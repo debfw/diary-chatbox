@@ -1,7 +1,7 @@
-import React, {  useEffect,  useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Input, List, ListItem, ListItemText } from "@mui/material";
-import { DiaryEntry } from "@/types/feature";
-
+import { DiaryEntry } from "@/utils/schema";
+import { trimText } from "@/utils/trimText";
 
 export default function SearchHistory({ entries }: { entries: DiaryEntry[] }) {
   const [displayList, setDisplayList] = useState<DiaryEntry[]>([]);
@@ -22,13 +22,6 @@ export default function SearchHistory({ entries }: { entries: DiaryEntry[] }) {
     setDisplayList(sortedEntries);
   }, [entries, isSortClicked]);
 
-  const trimText = (text: string) => {
-    if (text.length > 20) {
-      let displayText = text.slice(0, 55) + "...";
-      return displayText;
-    }
-    return text;
-  };
   return (
     <div className="w-full max-w-2xl p-6 bg-yellow-50 rounded-lg shadow-md dark:bg-gray-800 mt-10">
       <div className="flex justify-between mb-4">

@@ -4,6 +4,7 @@ import "./globals.css";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../theme";
+import { QueryProvider } from "@/utils/QueryProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -19,9 +20,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AppRouterCacheProvider>
-          <ThemeProvider theme={theme}>{children} </ThemeProvider>
-        </AppRouterCacheProvider>
+        <QueryProvider>
+          <AppRouterCacheProvider>
+            <ThemeProvider theme={theme}>{children} </ThemeProvider>
+          </AppRouterCacheProvider>
+        </QueryProvider>
       </body>
     </html>
   );

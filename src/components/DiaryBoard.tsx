@@ -1,85 +1,91 @@
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Avatar, Box, SnackbarContent } from "@mui/material";
 import Button from "@mui/material/Button";
-import { useCompletion } from "ai/react";
 import React, { useState } from "react";
 import SearchHistory from "./SearchHistory";
 import { DiaryEntry } from "@/types/feature";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+import { z } from "zod";
+import {
+  useChatQuery,
+  useSpellCheckQuery,
+  useSendEmailMutation,
+} from "@/utils/queries";
+
 const defaultText =
   "Hey kids, I'm your JourneyPal! I can turn your words into drawings and your stories into memories. Let's make your diary awesome together! Ready for an adventure?";
 
+const defaultValues: FormValue = {
+  text: "",
+  email: "",
+} as const;
+
+const chatBotButtons = [
+  { label: "Highlights", response: "one idea on todays highlights" },
+  { label: "Gratitude", response: "one idea on todays gratitude" },
+  { label: "Goals", response: "one idea on todays today goals" },
+] as const;
+
+const formSchema = z.object({
+  text: z
+    .string()
+    .min(10, { message: "Please enter more than 10 characters." }),
+  email: z.string().email({ message: "Please correct your email address." }),
+});
+
+type FormValue = z.infer<typeof formSchema>;
+
 function DiaryBoard() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    getValues,
-  } = useForm();
-
-  const onSubmit = (data: any) => console.log(data);
-
-  const initialValues = {
-    text: "",
-    email: "",
-  };
-  const [response, setResponse] = useState("");
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
-  const { complete } = useCompletion({
-    api: "/api/chat",
+  const { control, handleSubmit, formState, setValue, watch } = useForm({
+    defaultValues,
+    resolver: zodResolver(formSchema),
   });
 
-  const { complete: completeSpellCheck } = useCompletion({
-    api: "/api/spellCheck",
-  });
+  const watchText = watch("text");
 
-  const handleCheckSpelling = async (entryText: string) => {
-    const completion = await completeSpellCheck(entryText);
-    if (!completion) throw new Error("Failed to check typos");
-    const typos = JSON.parse(completion);
+  const { refetch: fetchSpellCheck, error: spellCheckError } =
+    useSpellCheckQuery(watchText);
+  const {
+    error: chatQueryError,
+    data: response,
+    refetch: handleAskPal,
+  } = useChatQuery(watchText);
+
+  const { mutate: sendEmail, error: sendEmailError } = useSendEmailMutation();
+
+  const handleOnSave = async (data: FormValue) => {
+    const { data: typos } = await fetchSpellCheck();
     if (typos?.length && !window.confirm("Typos found… continue?")) return;
-    else {
-      setDiaryEntries((prevEntries) => [
-        ...prevEntries,
-        {
-          id: Date.now(),
-          text: entryText,
-          date: new Date(),
-        },
-      ]);
-      getValues().text = "";
-      alert("Diary Saved!");
-    }
-  };
-
-  const handleResponse = React.useCallback(
-    async (msg: string) => {
-      const completion = await complete(msg);
-      if (!completion) throw new Error("Failed to generate chat");
-      setResponse(completion);
-    },
-    [complete]
-  );
-
-  const handleSendEmail = async (e: React.SyntheticEvent) => {
-    console.log("send email");
-    await fetch("/api/sendEmail", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const now = new Date();
+    setDiaryEntries((prevEntries) => [
+      ...prevEntries,
+      {
+        id: now.getTime(),
+        text: data.text,
+        date: now,
       },
-      body: JSON.stringify({
-        senderEmail: getValues().text ?? "",
-        message: getValues().text ?? "",
-      }),
-    });
+    ]);
+    setValue("text", "");
+    alert("Diary Saved!");
   };
+
+  const errors = [chatQueryError, spellCheckError, sendEmailError];
 
   return (
     <div className="w-full max-w-2xl p-6 bg-white rounded-lg shadow-md dark:bg-gray-800 mt-10">
       <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">
         My Diary
       </h1>
+      {errors.map(
+        (error, idx) =>
+          error && (
+            <p className="text-red-500 mb-5" key={idx}>
+              {error.message}
+            </p>
+          )
+      )}
 
       <Box sx={{ display: "flex", marginBottom: 5 }}>
         <Avatar
@@ -89,80 +95,79 @@ function DiaryBoard() {
         />
         <SnackbarContent
           sx={{ fontSize: 18 }}
-          message={response ? response : defaultText}
+          message={response || defaultText}
         />
       </Box>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form>
         <label htmlFor="email">Email</label>
-        <input
-          className="w-full h-16 mb-6 p-4 rounded-md bg-gray-100 dark:bg-gray-700 dark:text-gray-100"
-          defaultValue={initialValues.email}
-          placeholder="bluebill1049@hotmail.com"
-          type="email"
-          {...register("email")}
+        <Controller
+          name="email"
+          control={control}
+          render={({ field }) => (
+            <input
+              {...field}
+              className="w-full h-16 mb-6 p-4 rounded-md bg-gray-100 dark:bg-gray-700 dark:text-gray-100"
+              placeholder="bluebill1049@hotmail.com"
+              type="email"
+            />
+          )}
         />
-
+        {formState.errors.email && (
+          <p className="text-red-500 mb-5">{formState.errors.email.message}</p>
+        )}
         <label htmlFor="text">Diary Box</label>
-        <input
-          className="w-full h-[200px] p-4 rounded-md bg-gray-100 dark:bg-gray-700 dark:text-gray-100"
-          defaultValue={initialValues.text}
-          placeholder="Keep your diary or ask for suggestions."
-          {...register("text", {
-            required: true,
-            validate: (value) =>
-              value !== "Keep your diary or ask for suggestions.",
-          })}
+        <Controller
+          name="text"
+          control={control}
+          render={({ field }) => (
+            <input
+              {...field}
+              className="w-full h-[200px] p-4 rosunded-md bg-gray-100 dark:bg-gray-700 dark:text-gray-100"
+              placeholder="Keep your diary or ask for suggestions."
+              type="text"
+            />
+          )}
         />
-        {errors.text && <p className="text-red-500 mb-5">This is required</p>}
-
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <Button
-            variant="outlined"
-            type="submit"
-            onClick={() => handleResponse("one idea on todays highlights")}
-          >
-            Highlights
-          </Button>
-          <Button
-            variant="outlined"
-            type="submit"
-            onClick={() => handleResponse("one idea on todays gratitude")}
-          >
-            Gratitude
-          </Button>
-          <Button
-            variant="outlined"
-            type="submit"
-            onClick={() => handleResponse("one idea on todays today goals")}
-          >
-            Goals
-          </Button>
+        {formState.errors.text && (
+          <p className="text-red-500 mb-5">{formState.errors.text.message}</p>
+        )}
+        <div className="grid grid-cols-3 gap-4 mb-6 mt-6">
+          {chatBotButtons.map((data, idx) => (
+            <Button
+              key={idx}
+              variant="outlined"
+              type="submit"
+              onClick={handleSubmit(() => handleAskPal())}
+            >
+              {data.label}
+            </Button>
+          ))}
         </div>
         <div className="flex justify-end space-x-4">
           <Button
             variant="contained"
+            onClick={handleSubmit(() => handleAskPal())}
             type="submit"
-            sx={{ background: "black" }}
-            onClick={() => handleResponse(getValues().text)}
+            sx={{ bgcolor: "black", mr: 2 }}
           >
             Ask JourneyPal
           </Button>
           <Button
             variant="contained"
+            onClick={handleSubmit(handleOnSave)}
             type="submit"
-            sx={{ background: "black" }}
-            onClick={() => handleCheckSpelling(getValues().text)}
+            sx={{ bgcolor: "black", mr: 2 }}
           >
             Finished & Save
           </Button>
           <Button
-            type="submit"
-            onClick={(e) => {
-              handleSendEmail(e);
-            }}
             variant="contained"
-            sx={{ background: "black" }}
+            onClick={handleSubmit((data) => {
+              sendEmail(data);
+            })}
+            type="submit"
+            sx={{ bgcolor: "black", mr: 2 }}
           >
             Send email
           </Button>

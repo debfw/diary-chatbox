@@ -1,6 +1,6 @@
-import { FeaturesType } from "@/types/feature";
+import { Feature } from "@/assets/features";
 
-export function FeatureCard({ feature }: { feature: FeaturesType }) {
+export function FeatureCard({ feature }: { feature: Feature }) {
   return (
     <div className="p-4 border rounded-lg shadow">
       <h3 className="text-lg md:text-xl lg:text-2xl font-semibold mb-2">

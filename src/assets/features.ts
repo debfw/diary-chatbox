@@ -1,21 +1,21 @@
-import { FeatureTitlesEnum } from "@/utils/schema";
-
 //centralized the main features
 export const features = [
   {
-    title: FeatureTitlesEnum.enum["Generate Diary"],
+    title: "Generate Diary",
     description: "No ideas? Let JourneyPal suggests you some!",
   },
   {
-    title: FeatureTitlesEnum.enum["Search History"],
+    title: "Search History",
     description: "Diary detective at your service, find and sort your stories!",
   },
   {
-    title: FeatureTitlesEnum.enum["Send As Email!"],
+    title: "Send As Email!",
     description: "Click and send, hand out summer homework in ease",
   },
   {
-    title: FeatureTitlesEnum.enum["Spell Check"],
+    title: "Spell Check",
     description: "Let me check your work and help you spot any mistakes!",
   },
-];
+] as const;
+
+export type Feature = (typeof features)[number];
